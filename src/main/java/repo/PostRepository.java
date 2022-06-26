@@ -25,7 +25,4 @@ public interface PostRepository extends GenericRepository<Long, Post> {
 
     void deleteByStatus(PostStatus postStatus);
 
-    List<Post> getPostsForWriter(Long id);
-
-    Long getWriterId(Long postId);
 }

@@ -6,11 +6,11 @@ import jakarta.persistence.*;
 @Table(name = "tags")
 public class Tag {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name = "tag_seq", initialValue = 1, allocationSize = 2)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tag_seq")
+    @SequenceGenerator(name="tag_seq", initialValue = 1, allocationSize = 1)
     long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "name")
     String name;
 
     public Tag() {

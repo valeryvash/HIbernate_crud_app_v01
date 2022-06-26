@@ -21,41 +21,40 @@ public class EntityPrinter {
     }
 
     private static void print(Writer writer) {
-        System.out.println(
-                "\nWriter:" +
-                        "\nid: " + writer.getId() +
-                        "\nname: " + writer.getName()
+        System.out.printf(
+                "Writer: [ id: %0,10d | name: %-20s ]\n", writer.getId(), writer.getName()
         );
+
 
         List<Post> posts = writer.getPosts();
 
         if (posts.isEmpty()) {
-            System.out.println("Writer has no posts");
+            System.out.println("Zero posts");
         } else {
+            System.out.printf("%d posts: \n", posts.size());
             posts.forEach(EntityPrinter::print);
         }
     }
 
     private static void print(Post post) {
-        System.out.println(
-                "Post:" +
-                        "\nid: " + post.getId() +
-                        "\ncontent: " + post.getContent() +
-                        "\nstatus:" + post.getPostStatus().toString()
+        System.out.printf(
+                "Post:   [ id: %0,10d | content: %-30s | Status: %-5s ]\n",
+                post.getId(),post.getContent(),post.getPostStatus().toString()
         );
 
         List<Tag> tags = post.getTags();
 
         if (tags.isEmpty()) {
-            System.out.println("Post has no tags");
+            System.out.println("Zero tags");
         } else {
             tags.forEach(EntityPrinter::print);
         }
     }
 
     private static void print(Tag tag) {
-        System.out.println(
-                "Tag: " + tag.getId() + " , " + tag.getName()
+        System.out.printf(
+                "Tag:[id: %0,4d | name: %s ]\n", tag.getId(), tag.getName()
         );
+
     }
 }

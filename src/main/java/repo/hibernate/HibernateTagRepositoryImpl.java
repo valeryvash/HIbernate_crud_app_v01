@@ -5,9 +5,9 @@ import model.Tag;
 import org.hibernate.Session;
 import repo.TagRepository;
 
-import static util.SessionProvider.*;
-import java.util.ArrayList;
 import java.util.List;
+
+import static util.SessionProvider.provideSession;
 
 public class HibernateTagRepositoryImpl implements TagRepository {
 
@@ -15,27 +15,33 @@ public class HibernateTagRepositoryImpl implements TagRepository {
     public void add(Tag entity) {
         try (Session session = provideSession()) {
                 session.beginTransaction();
+
                 session.persist(entity);
+
                 session.getTransaction().commit();
         }
     }
 
     @Override
     public Tag get(Long aLong) {
-        Tag tag = null;
         try (Session session = provideSession()) {
             session.beginTransaction();
-            tag = session.get(Tag.class, aLong);
+
+            Tag tag = session.get(Tag.class, aLong);
+
             session.getTransaction().commit();
+
+            return tag;
         }
-        return tag;
     }
 
     @Override
     public void update(Tag entity) {
         try (Session session = provideSession()) {
             session.beginTransaction();
+
             session.merge(entity);
+
             session.getTransaction().commit();
         }
     }
@@ -44,24 +50,28 @@ public class HibernateTagRepositoryImpl implements TagRepository {
     public void remove(Long aLong) {
         try (Session session = provideSession()) {
             session.beginTransaction();
+
             Tag tag = session.get(Tag.class, aLong);
+
             session.remove(tag);
+
             session.getTransaction().commit();
         }
     }
 
-    /**
-     *
-     * @return list of all tags
-     */
     @Override
     @Deprecated
     public List<Tag> getAll() {
         try (Session session = provideSession()) {
             session.beginTransaction();
+
             List<Tag> allTags = session
-                    .createQuery("select a from Tag a", Tag.class)
+                    .createQuery(
+                            "select t " +
+                            "from Tag t",
+                            Tag.class)
                     .getResultList();
+
             session.getTransaction().commit();
             return allTags;
         }
@@ -70,13 +80,20 @@ public class HibernateTagRepositoryImpl implements TagRepository {
     @Override
     public Tag getByName(String name) {
         try (Session session = provideSession()) {
-            return session.createQuery(
-                            "select a from Tag a where a.name = ?1", Tag.class
-                    ).setParameter(1, name)
+            session.beginTransaction();
+
+            Tag tag = session
+                    .createQuery(
+                            "select a " +
+                                    "from Tag a " +
+                                    "where a.name = ?1",
+                            Tag.class)
+                    .setParameter(1, name)
                     .getSingleResult();
 
-        } catch (NoResultException e) {
-            return new Tag();
+            session.getTransaction().commit();
+
+            return tag;
         }
     }
 
@@ -84,30 +101,35 @@ public class HibernateTagRepositoryImpl implements TagRepository {
     public boolean containsId(Long id) {
         try (Session session = provideSession()) {
             session.beginTransaction();
+
             Tag tag = session.get(Tag.class, id);
+
             session.getTransaction().commit();
-            if (tag == null) {
-                return false;
-            } else {
-                return true;
-            }
+
+            return tag != null;
         }
     }
 
     @Override
     public boolean nameContains(String name) {
         try (Session session = provideSession()) {
-            Tag returnedTag = session.createQuery(
-                            "select a from Tag a where a.name = ?1", Tag.class
+            session.beginTransaction();
+
+            Tag tag = session.createQuery(
+                            "select a " +
+                                    "from Tag a " +
+                                    "where a.name = ?1",
+                            Tag.class
                     )
                     .setParameter(1, name)
                     .getSingleResult();
-            if (returnedTag.getId() != 0L) {
-                return true;
-            }
-        } catch (NoResultException ignored) {
+
+            session.getTransaction().commit();
+
+            return true;
+        } catch (NoResultException e) {
+            return false;
         }
-        return false;
     }
 
 }
