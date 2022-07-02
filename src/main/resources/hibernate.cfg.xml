@@ -4,6 +4,7 @@
 
 <hibernate-configuration>
     <session-factory>
+<!--        the next 4 properties shall be changed while you download this app from repo-->
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
         <property name="hibernate.connection.username">postgres</property>
         <property name="hibernate.connection.password">1</property>
@@ -12,7 +13,7 @@
         <property name="show_sql">false</property>
         <property name="generate_statistics">false</property>
         <property name="use_sql_comments">false</property>
-<!--     create-drop for tests purpose only. use validate for work purpose-->
+<!--     create-drop for test purpose only. use validate for work purpose-->
         <property name="hbm2ddl.auto"> validate </property>
 
     </session-factory>

@@ -19,6 +19,8 @@
         <mockito.version>4.6.1</mockito.version>
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <flyway.version>8.5.13</flyway.version>
+        <log4j.version>1.2.17</log4j.version>
+
     </properties>
 
     <dependencies>
@@ -53,10 +55,11 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
+            <version>${log4j.version}</version>
         </dependency>
 
 
