@@ -20,42 +20,8 @@ public class PostService {
         this.tagRepository = tagRepository;
         this.postRepository = postRepository;
     }
-
-    /**
-     *  This method can be used as a template for add and update methods
-     * @param h1 add/update action for entity
-     * @param post entity which shall be added/updated
-     */
-    private void helper(Consumer<Post> h1, Post post) {
-        if (post != null) {
-
-            List<Tag> tags = post.getTags();
-            if (!tags.isEmpty()) {
-                tags.forEach( tag -> {
-
-                    if (tag.getId() == 0L) {
-                        this.tagRepository.add(tag);
-                    }
-
-                });
-
-                post.setTags(tags);
-            }
-            h1.accept(post);
-        }
-    }
-
     public void add(Post entity) {
         if (entity != null) {
-            List<Tag> tags = entity.getTags();
-            if (!tags.isEmpty()) {
-                tags.forEach( tag -> {
-                    if (tag.getId() == 0L) {
-                        tagRepository.add(tag);
-                    }
-                });
-                entity.setTags(tags);
-            }
             postRepository.add(entity);
         }
     }
@@ -78,15 +44,6 @@ public class PostService {
 
     public void update(Post entity) {
         if (entity != null) {
-            List<Tag> tags = entity.getTags();
-            if (!tags.isEmpty()) {
-                tags.forEach( tag -> {
-                    if (tag.getId() == 0L) {
-                        tagRepository.add(tag);
-                    }
-                });
-                entity.setTags(tags);
-            }
             postRepository.update(entity);
         }
     }

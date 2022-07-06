@@ -23,41 +23,10 @@ public class WriterService {
         this.writerRepo = writerRepo;
     }
 
-    /**
-     *  The method purpose is to check and persist new objects inside of
-     *  writers and posts collections
-     * @param action - final action (add or update) for entity
-     * @param entity - element which collections need to be checked for new elements
-     */
-    private void helper(Consumer<Writer> action, Writer entity) {
-        if (entity != null) {
-
-            List<Post> posts = entity.getPosts();
-            if (!posts.isEmpty()) {
-                posts.forEach(p -> {
-
-                    List<Tag> tags = p.getTags();
-                    if (!tags.isEmpty()) {
-                        tags.forEach(t -> {
-                            if (t.getId() == 0L) {
-                                this.tagRepo.add(t);
-                            }
-                        });
-                        p.setTags(tags);
-                    }
-
-                    if (p.getId() == 0L) {
-                        this.postRepo.add(p);
-                    }
-                });
-            }
-            entity.setPosts(posts);
-            action.accept(entity);
-        }
-    }
-
     public void add(Writer entity) {
-        helper(writerRepo::add, entity);
+        if (entity != null) {
+            writerRepo.add(entity);
+        }
     }
 
     public Writer get(Long aLong) {
@@ -77,7 +46,9 @@ public class WriterService {
     }
 
     public void update(Writer entity) {
-        helper(writerRepo::update, entity);
+        if (entity != null) {
+            writerRepo.update(entity);
+        }
     }
 
     public void remove(Long aLong) {

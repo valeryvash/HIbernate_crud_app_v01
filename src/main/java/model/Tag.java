@@ -2,17 +2,20 @@ package model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "tags")
 public class Tag {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tag_seq")
-    @SequenceGenerator(name="tag_seq", initialValue = 1, allocationSize = 1)
-    long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     @Column(nullable = false,name = "name")
-    String name;
+    private String name;
 
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "tags")
+    private List<Post> relatedPosts;
     public Tag() {
     }
 

@@ -10,15 +10,20 @@ import java.util.List;
 public class Writer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "writer_seq")
-    @SequenceGenerator(name = "writer_seq",  initialValue = 1, allocationSize = 1)
-    long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
-    @Column(nullable = false,name = "name")
-    String name;
+    @Column(nullable = false,
+            name = "name")
+    private String name;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    List<Post> posts;
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            orphanRemoval = true,
+            mappedBy = "writer"
+    )
+    private List<Post> posts;
 
     public Writer() {
     }

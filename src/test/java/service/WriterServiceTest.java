@@ -25,16 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class WriterServiceTest {
 
-    private static TagRepository tR = null;
-    private static PostRepository pR = null;
-    private static WriterRepository wR = null;
-    static WriterService writerService = null;
+    private static TagRepository tR = mock(TagRepository.class);;
+    private static PostRepository pR = mock(PostRepository.class);;
+    private static WriterRepository wR =  mock(WriterRepository.class);
+    static WriterService writerService = new WriterService(tR,pR,wR);
 
     @BeforeAll
     static void set() {
-        tR = mock(TagRepository.class);
-        pR = mock(PostRepository.class);
-        wR = mock(WriterRepository.class);
 
         Stream.of(wR, pR, tR).forEach(repo -> {
             doThrow(NullPointerException.class).when(repo).add(isNull());
@@ -55,35 +52,32 @@ class WriterServiceTest {
 
         doThrow(NullPointerException.class).when(pR).deleteByStatus(isNull());
 
-//         TODO: find out how to check object properties and throws exceptions
-//        doThrow(IllegalArgumentException.class).when(wR).add(any(Writer.class));
+    }
 
-        writerService = new WriterService(tR,pR,wR);
+    private Writer getWriter() {
+        Writer w = new Writer();
+        w.setName("new name");
+        return w;
     }
 
     @Test
     void add() {
-        writerService.add(null);
-
-        Writer w = new Writer();
-        w.setName("new one name");
-
-        writerService.add(w);
+        writerService.add(getWriter());
         verify(wR).add(argThat(writer -> writer.getId() == 0L));
     }
 
     @Test
     void get() {
         writerService.get(null);
-
         writerService.get(500L);
     }
 
     @Test
     void update() {
         writerService.update(null);
-
-        writerService.update(new Writer());
+        Writer w = getWriter();
+        writerService.update(w);
+        verify(wR).update(w);
     }
 
     @Test
@@ -91,21 +85,37 @@ class WriterServiceTest {
         writerService.remove(null);
 
         LongStream.range(1, 500).forEach(writerService::remove);
+
+        verify(wR,times(499)).remove(isNotNull());
     }
 
     @Test
     void containsId() {
         writerService.containsId(null);
+
+        LongStream.range(1, 500).forEach(writerService::containsId);
+
+        verify(wR,times(499)).containsId(isNotNull());
     }
 
     @Test
     void nameContains() {
         writerService.nameContains(null);
+
+        String name = "new name";
+        writerService.nameContains(name);
+
+        verify(wR, times(1)).nameContains(name);
     }
 
     @Test
     void getByName() {
         writerService.getByName(null);
+
+        String name = "new name";
+        writerService.getByName(name);
+
+        verify(wR, times(1)).getByName(name);
     }
 
 }

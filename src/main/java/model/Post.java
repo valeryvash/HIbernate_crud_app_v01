@@ -1,6 +1,7 @@
 package model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,18 +10,29 @@ import java.util.List;
 @Table(name = "posts")
 public class Post {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "post_seq")
-    @SequenceGenerator(name = "post_seq", initialValue = 1, allocationSize = 1)
-    long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
     @Column(nullable = false,name = "content")
-    String content;
+    private String content;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    List<Tag> tags;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Tag> tags;
 
     @Column(nullable = false,name = "post_status")
-    PostStatus postStatus = PostStatus.ACTIVE;
+    @Enumerated(EnumType.STRING)
+    private PostStatus postStatus = PostStatus.ACTIVE;
 
+    @ManyToOne
+    @JoinColumn(name = "writer_id",nullable = false)
+    private Writer writer;
+
+    public Writer getWriter() {
+        return writer;
+    }
+
+    public void setWriter(Writer writer) {
+        this.writer = writer;
+    }
 
     public PostStatus getPostStatus() {
         return postStatus;

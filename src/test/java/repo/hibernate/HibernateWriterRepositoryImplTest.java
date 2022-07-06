@@ -2,6 +2,7 @@ package repo.hibernate;
 
 import jakarta.persistence.NoResultException;
 import model.Post;
+import model.Tag;
 import model.Writer;
 import org.junit.jupiter.api.*;
 import repo.WriterRepository;
@@ -23,40 +24,6 @@ class HibernateWriterRepositoryImplTest {
     @BeforeAll
     static void set() {
         writerRepo = new HibernateWriterRepositoryImpl();
-    }
-
-
-    @Test
-    @Order(10)
-    void add() {
-        Writer writer = new Writer();
-        String name = "new one name";
-        writer.setName(name);
-
-        assertEquals(0L, writer.getId());
-        assertNotNull(writer.getPosts());
-        assertTrue(writer.getPosts() instanceof ArrayList<Post>);
-
-        List<Post> posts = new ArrayList<>();
-        Post post = new Post();
-        post.setContent("new one content");
-        posts.add(post);
-        writer.setPosts(posts);
-
-        final Writer w = writer;
-
-        assertThrows(IllegalStateException.class, () -> writerRepo.add(w));
-        assertTrue(writer.getId() > 0L);
-
-        writer = null;
-        writer = new Writer();
-        writer.setName("new one writer name here");
-
-        assertEquals(0L, writer.getId());
-        writerRepo.add(writer);
-        assertTrue(writer.getId() > 0L);
-
-        assertThrows(IllegalArgumentException.class, () -> writerRepo.add(null));
     }
 
     @Test
@@ -150,14 +117,14 @@ class HibernateWriterRepositoryImplTest {
 
         List<Long> idList = new ArrayList<>();
 
-        Stream.of("one","two","three")
+        Stream.of("one", "two", "three")
                 .forEach(v -> {
                     Writer w;
                     w = new Writer();
                     w.setName(v);
                     writerRepo.add(w);
                     idList.add(w.getId());
-        });
+                });
 
         idList.forEach(id -> assertTrue(writerRepo.containsId(id)));
         idList.forEach(id -> assertFalse(writerRepo.containsId(id + 500L)));
@@ -178,9 +145,9 @@ class HibernateWriterRepositoryImplTest {
             writerRepo.add(w);
         });
 
-        names.forEach( name -> {
+        names.forEach(name -> {
             assertTrue(writerRepo.nameContains(name));
-            assertFalse(writerRepo.nameContains(name.substring(1,3)));
+            assertFalse(writerRepo.nameContains(name.substring(1, 3)));
         });
 
     }
@@ -200,5 +167,43 @@ class HibernateWriterRepositoryImplTest {
         assertThrows(NoResultException.class, () -> writerRepo.getByName(null));
         assertThrows(NoResultException.class, () -> writerRepo.getByName(""));
         assertThrows(NoResultException.class, () -> writerRepo.getByName("\n"));
+    }
+
+    /**
+     * This test purpose is to check Annotations works properly
+     */
+    @Test
+    void dbFiller() {
+
+        Stream.of("one", "two","three", "four", "five").forEach(
+                s -> {
+                    Writer w = new Writer();
+
+                    w.setName(s + " writer name");
+
+                    List<Post> posts = Stream.of("one", "two", "three", "four", "five")
+                            .map((s2) -> {
+                                Post p = new Post();
+                                p.setContent( s2 + " post content");
+
+                                p.setWriter(w);
+
+                                List<Tag> tags = Stream.of("one", "two", "three", "four", "five")
+                                        .map((s3) -> {
+                                            Tag t = new Tag();
+                                            t.setName(s3 + " tag name");
+                                            return t;
+                                        }).toList();
+
+                                p.setTags(tags);
+
+                                return p;
+                            }).toList();
+
+                    w.setPosts( posts);
+
+                    writerRepo.add(w);
+                }
+        );
     }
 }

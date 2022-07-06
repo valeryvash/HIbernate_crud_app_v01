@@ -33,3 +33,5 @@ Technologies: Java, PostgresSQL, Hibernate, Flyway, Maven.
 
 - Run "StartView.class"
 
+
+
