@@ -51,13 +51,13 @@ public class WriterView {
 
     private static void choice() {
         switch (sc.nextLine().toLowerCase()) {
-            case "1" -> writerCreate(); // done
-            case "2" -> getWriter(); // done
-            case "3" -> updateWriterName(); // done
-            case "4" -> writerDelete(); // done
-            case "5" -> getWriterPosts(); // done
-            case "6" -> getAllWriters(); // done TODO: compare this point with second point. Delete this point, if them equal.
-            case "7" -> createPost(); // done
+            case "1" -> writerCreate();
+            case "2" -> getWriter();
+            case "3" -> updateWriterName();
+            case "4" -> writerDelete();
+            case "5" -> getWriterPosts();
+            case "6" -> getAllWriters();
+            case "7" -> createPost();
 
             case "q" -> System.exit(0);
             case "p" -> StartView.run();

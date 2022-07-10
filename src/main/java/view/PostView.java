@@ -49,13 +49,13 @@ public class PostView {
 
     private static void choice() {
         switch (sc.nextLine().toLowerCase()) {
-            case "1" -> showAllPosts(); // done
-            case "2" -> getPostById();  // done
-            case "3" -> updatePostContentById(); // done
-            case "4" -> updatePostTagsById(); // done
-            case "5" -> updatePostStatusById(); // done
-            case "6" -> deletePostById(); // done
-            case "7" -> deletePostsByStatus(); // done
+            case "1" -> showAllPosts();
+            case "2" -> getPostById();
+            case "3" -> updatePostContentById();
+            case "4" -> updatePostTagsById();
+            case "5" -> updatePostStatusById();
+            case "6" -> deletePostById();
+            case "7" -> deletePostsByStatus();
             case "8" -> getPostsByStatus();
 
             case "q" -> System.exit(0);
