@@ -21,6 +21,14 @@ public class WriterService {
 
     public void add(Writer entity) {
         if (entity != null) {
+            List<Post> posts = entity.getPosts();
+            if (posts != null && !posts.isEmpty()) {
+                posts.forEach(p -> {
+                    if (p.getWriter() != entity) {
+                        p.setWriter(entity);
+                    }
+                });
+            }
             writerRepo.add(entity);
         }
     }
