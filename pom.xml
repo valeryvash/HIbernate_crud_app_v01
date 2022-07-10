@@ -13,8 +13,8 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <posgres.driver.version>42.3.6</posgres.driver.version>
-        <hibernate.version>6.1.0.Final</hibernate.version>
+        <posgres.driver.version>42.4.0</posgres.driver.version>
+        <hibernate.version>6.1.1.Final</hibernate.version>
         <jakarta.persistence.version>3.1.0</jakarta.persistence.version>
         <mockito.version>4.6.1</mockito.version>
         <junit.jupiter.version>5.8.2</junit.jupiter.version>

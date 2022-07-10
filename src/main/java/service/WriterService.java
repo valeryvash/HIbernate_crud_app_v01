@@ -13,13 +13,9 @@ import java.util.function.Consumer;
 
 public class WriterService {
 
-    private TagRepository tagRepo = null;
-    private PostRepository postRepo = null;
     private WriterRepository writerRepo = null;
 
-    public WriterService(TagRepository tagRepo, PostRepository postRepo, WriterRepository writerRepo) {
-        this.tagRepo = tagRepo;
-        this.postRepo = postRepo;
+    public WriterService(WriterRepository writerRepo) {
         this.writerRepo = writerRepo;
     }
 
@@ -47,6 +43,14 @@ public class WriterService {
 
     public void update(Writer entity) {
         if (entity != null) {
+            List<Post> posts = entity.getPosts();
+            if (posts != null && !posts.isEmpty()) {
+                posts.forEach(p -> {
+                    if (p.getWriter() != entity) {
+                        p.setWriter(entity);
+                    }
+                });
+            }
             writerRepo.update(entity);
         }
     }

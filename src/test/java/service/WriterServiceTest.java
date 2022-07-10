@@ -1,75 +1,76 @@
 package service;
 
-import model.Post;
-import model.Tag;
 import model.Writer;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import repo.GenericRepository;
-import repo.PostRepository;
-import repo.TagRepository;
 import repo.WriterRepository;
-import util.EntityPrinter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 class WriterServiceTest {
 
-    private static TagRepository tR = mock(TagRepository.class);;
-    private static PostRepository pR = mock(PostRepository.class);;
-    private static WriterRepository wR =  mock(WriterRepository.class);
-    static WriterService writerService = new WriterService(tR,pR,wR);
+    private static WriterRepository wR = mock(WriterRepository.class);
+    static WriterService writerService = new WriterService(wR);
 
     @BeforeAll
     static void set() {
-
-        Stream.of(wR, pR, tR).forEach(repo -> {
-            doThrow(NullPointerException.class).when(repo).add(isNull());
-            doThrow(NullPointerException.class).when(repo).get(isNull());
-            doThrow(NullPointerException.class).when(repo).update(isNull());
-            doThrow(NullPointerException.class).when(repo).remove(isNull());
-        });
+        doThrow(NullPointerException.class).when(wR).add(isNull());
+        doThrow(NullPointerException.class).when(wR).get(isNull());
+        doThrow(NullPointerException.class).when(wR).update(isNull());
+        doThrow(NullPointerException.class).when(wR).remove(isNull());
 
         doThrow(NullPointerException.class).when(wR).containsId(isNull());
-        doThrow(NullPointerException.class).when(pR).containsId(isNull());
-        doThrow(NullPointerException.class).when(tR).containsId(isNull());
 
         doThrow(NullPointerException.class).when(wR).nameContains(isNull());
         doThrow(NullPointerException.class).when(wR).getByName(isNull());
-
-        doThrow(NullPointerException.class).when(tR).nameContains(isNull());
-        doThrow(NullPointerException.class).when(tR).getByName(isNull());
-
-        doThrow(NullPointerException.class).when(pR).deleteByStatus(isNull());
-
     }
 
     private Writer getWriter() {
+
         Writer w = new Writer();
         w.setName("new name");
         return w;
     }
 
     @Test
+    @DisplayName("verify that object passed to a repository level without ")
     void add() {
-        writerService.add(getWriter());
-        verify(wR).add(argThat(writer -> writer.getId() == 0L));
+        Writer w = getWriter();
+        writerService.add(w);
+        verify(wR).add(w);
     }
 
     @Test
-    void get() {
+    @DisplayName("verify that null argument doesn't pass to a repository level")
+    void nullCheck(){
+        writerService.add(null);
         writerService.get(null);
-        writerService.get(500L);
+        writerService.update(null);
+        writerService.remove(null);
+        writerService.nameContains(null);
+        writerService.getByName(null);
+    }
+
+    @Test
+    @DisplayName("verify that id and string arguments passed to a repository level")
+    void verifyThatIdArgumentsPassedToRepositoryLevel() {
+        LongStream.range(1L,1001L).forEach(
+                id -> {
+                    writerService.get(id);
+                    writerService.remove(id);
+                    writerService.nameContains(String.valueOf(id));
+                    writerService.getByName(String.valueOf(id));
+                    writerService.getAll();
+                }
+        );
+
+        verify(wR, times(1000)).get(isA(Long.class));
+        verify(wR, times(1000)).remove(isA(Long.class));
+        verify(wR, times(1000)).nameContains(isA(String.class));
+        verify(wR, times(1000)).getByName(isA(String.class));
+        verify(wR, times(1000)).getAll();
     }
 
     @Test
@@ -80,42 +81,12 @@ class WriterServiceTest {
         verify(wR).update(w);
     }
 
-    @Test
-    void remove() {
-        writerService.remove(null);
-
-        LongStream.range(1, 500).forEach(writerService::remove);
-
-        verify(wR,times(499)).remove(isNotNull());
-    }
 
     @Test
-    void containsId() {
-        writerService.containsId(null);
-
-        LongStream.range(1, 500).forEach(writerService::containsId);
-
-        verify(wR,times(499)).containsId(isNotNull());
-    }
-
-    @Test
-    void nameContains() {
+    void nameNullContains() {
         writerService.nameContains(null);
 
-        String name = "new name";
-        writerService.nameContains(name);
-
-        verify(wR, times(1)).nameContains(name);
-    }
-
-    @Test
-    void getByName() {
-        writerService.getByName(null);
-
-        String name = "new name";
-        writerService.getByName(name);
-
-        verify(wR, times(1)).getByName(name);
+        verify(wR,times(0)).containsId(null);
     }
 
 }

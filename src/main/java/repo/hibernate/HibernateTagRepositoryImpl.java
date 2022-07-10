@@ -2,134 +2,184 @@ package repo.hibernate;
 
 import jakarta.persistence.NoResultException;
 import model.Tag;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import repo.TagRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static util.SessionProvider.provideSession;
 
 public class HibernateTagRepositoryImpl implements TagRepository {
 
+
     @Override
     public void add(Tag entity) {
+        Transaction transaction = null;
         try (Session session = provideSession()) {
-                session.beginTransaction();
+            transaction = session.beginTransaction();
 
-                session.persist(entity);
+            session.persist(entity);
 
-                session.getTransaction().commit();
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
     }
 
     @Override
     public Tag get(Long aLong) {
+        Tag tag = null;
+
         try (Session session = provideSession()) {
-            session.beginTransaction();
-
-            Tag tag = session.get(Tag.class, aLong);
-
-            session.getTransaction().commit();
-
-            return tag;
+            tag = session.get(Tag.class, aLong);
+        } catch (HibernateException e) {
+            e.printStackTrace();
         }
+
+        if (tag == null) {
+            tag = new Tag();
+        }
+
+        return tag;
     }
 
     @Override
     public void update(Tag entity) {
+        Transaction transaction = null;
+
         try (Session session = provideSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
             session.merge(entity);
 
-            session.getTransaction().commit();
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
     }
 
     @Override
     public void remove(Long aLong) {
+        Transaction transaction = null;
         try (Session session = provideSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
-            Tag tag = session.get(Tag.class, aLong);
+            Tag tag = session.get(Tag.class,aLong);
 
             session.remove(tag);
 
-            session.getTransaction().commit();
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
     }
 
     @Override
     @Deprecated
     public List<Tag> getAll() {
-        try (Session session = provideSession()) {
-            session.beginTransaction();
+        List<Tag> toBeReturned = null;
 
-            List<Tag> allTags = session
-                    .createQuery(
-                            "select t " +
-                            "from Tag t",
+        try (Session session = provideSession()) {
+
+            toBeReturned = session.createQuery(
+                            """
+                                    FROM Tag t""",
                             Tag.class)
                     .getResultList();
 
-            session.getTransaction().commit();
-            return allTags;
+        } catch (HibernateException e) {
+            e.printStackTrace();
         }
+
+        if (toBeReturned == null) {
+            toBeReturned = new ArrayList<>();
+        }
+
+        return toBeReturned;
     }
 
     @Override
     public Tag getByName(String name) {
-        try (Session session = provideSession()) {
-            session.beginTransaction();
+        Tag tag = null;
+        Transaction transaction = null;
 
-            Tag tag = session
-                    .createQuery(
-                            "select a " +
-                                    "from Tag a " +
-                                    "where a.name = ?1",
+        try (Session session = provideSession()) {
+            transaction = session.beginTransaction();
+
+            tag = session.createQuery(
+                            """
+                                    FROM Tag a 
+                                    WHERE a.name = ?1""",
                             Tag.class)
                     .setParameter(1, name)
-                    .getSingleResult();
+                    .getResultList()
+                    .get(0);
 
-            session.getTransaction().commit();
-
-            return tag;
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
+
+        if (tag == null) {
+            tag = new Tag();
+        }
+
+        return tag;
     }
 
     @Override
     public boolean containsId(Long id) {
+        Tag tag = null;
+
         try (Session session = provideSession()) {
-            session.beginTransaction();
-
-            Tag tag = session.get(Tag.class, id);
-
-            session.getTransaction().commit();
-
-            return tag != null;
+            tag = session.get(Tag.class, id);
         }
+
+        return tag != null && (tag.getId() == id);
     }
 
     @Override
     public boolean nameContains(String name) {
-        try (Session session = provideSession()) {
-            session.beginTransaction();
+        List<Tag> list = null;
+        Transaction transaction = null;
 
-            Tag tag = session.createQuery(
-                            "select a " +
-                                    "from Tag a " +
-                                    "where a.name = ?1",
+        try (Session session = provideSession()) {
+            transaction = session.beginTransaction();
+
+            list = session.createQuery(
+                            """
+                                    FROM Tag a
+                                    WHERE a.name = ?1""",
                             Tag.class
                     )
                     .setParameter(1, name)
-                    .getSingleResult();
+                    .getResultList();
 
-            session.getTransaction().commit();
-
-            return true;
+            transaction.commit();
         } catch (NoResultException e) {
-            return false;
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
+
+        return list != null && !list.isEmpty();
     }
 
 }

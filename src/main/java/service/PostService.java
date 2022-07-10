@@ -12,12 +12,9 @@ import java.util.function.Consumer;
 
 public class PostService {
 
-    private TagRepository tagRepository;
-
     private PostRepository postRepository;
 
-    public PostService(TagRepository tagRepository, PostRepository postRepository) {
-        this.tagRepository = tagRepository;
+    public PostService(PostRepository postRepository) {
         this.postRepository = postRepository;
     }
     public void add(Post entity) {

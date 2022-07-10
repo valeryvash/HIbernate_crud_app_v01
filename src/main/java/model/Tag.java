@@ -11,11 +11,23 @@ public class Tag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false,name = "name")
+    @Column(
+            nullable = false,
+            name = "name"
+    )
     private String name;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "tags")
-    private List<Post> relatedPosts;
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST,CascadeType.MERGE}
+    )
+    @JoinTable(
+            name = "posts_tags",
+            joinColumns = @JoinColumn(name = "tag_id"),
+            inverseJoinColumns = @JoinColumn(name = "post_id")
+    )
+    private List<Post> posts;
+
     public Tag() {
     }
 
@@ -34,4 +46,13 @@ public class Tag {
     public void setName(String name) {
         this.name = name;
     }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
+    }
+
 }

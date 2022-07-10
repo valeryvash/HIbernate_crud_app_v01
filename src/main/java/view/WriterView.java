@@ -41,14 +41,8 @@ public class WriterView {
     private static final Scanner sc = new Scanner(System.in);
 
     private static final WriterRepository wr = new HibernateWriterRepositoryImpl();
-    private static final PostRepository pr = new HibernatePostRepositoryImpl();
-    private static final TagRepository tr = new HibernateTagRepositoryImpl();
 
-    private final static WriterService writerService = new WriterService(tr, pr, wr);
-
-    private final static PostService postService = new PostService(tr, pr);
-
-    private final static TagService tagService = new TagService(tr);
+    private final static WriterService writerService = new WriterService(wr);
 
     public static void run() {
         System.out.println(writerViewMessage);
@@ -57,13 +51,13 @@ public class WriterView {
 
     private static void choice() {
         switch (sc.nextLine().toLowerCase()) {
-            case "1" -> writerCreate();//done
-            case "2" -> getWriter();//done
-            case "3" -> updateWriterName();//done
-            case "4" -> writerDelete();//done
-            case "5" -> getWriterPosts();//done
-            case "6" -> getAllWriters();//done
-            case "7" -> createPost();
+            case "1" -> writerCreate(); // done
+            case "2" -> getWriter(); // done
+            case "3" -> updateWriterName(); // done
+            case "4" -> writerDelete(); // done
+            case "5" -> getWriterPosts(); // done
+            case "6" -> getAllWriters(); // done TODO: compare this point with second point. Delete this point, if them equal.
+            case "7" -> createPost(); // done
 
             case "q" -> System.exit(0);
             case "p" -> StartView.run();
@@ -77,22 +71,22 @@ public class WriterView {
         System.out.println("Input new post content \n 'q' for quit");
         Post p;
 
-            String s = sc.nextLine();
-            if (s.equalsIgnoreCase("q")) System.exit(0);
-            p = new Post();
-            p.setContent(s);
-            postService.add(p);
+        String s = sc.nextLine();
+        if (s.equalsIgnoreCase("q")) System.exit(0);
+        p = new Post();
+        p.setContent(s);
 
-            List<Tag> tags = getTagsList();
-            if (!tags.isEmpty()) {
-                p.setTags(tags);
-                postService.update(p);
-            }
+        List<Tag> tags = getTagsList();
+        if (!tags.isEmpty()) {
+            p.setTags(tags);
+        }
 
-            List<Post> posts = w.getPosts();
-            posts.add(p);
+        List<Post> posts = w.getPosts();
+        posts.add(p);
 
-            w.setPosts(posts);
+        w.setPosts(posts);
+
+        writerService.update(w);
     }
 
     private static List<Tag> getTagsList() {
@@ -104,15 +98,10 @@ public class WriterView {
             if (s.equalsIgnoreCase("q")) System.exit(0);
             if (s.equalsIgnoreCase("s")) break;
 
-            Tag t ;
-            if (tagService.nameContains(s)) {
-                t = tagService.getByName(s);
-            } else {
-                t = new Tag();
-                t.setName(s);
-                tagService.add(t);
-            }
+            Tag t = new Tag();
+            t.setName(s);
             tagsToBeReturned.add(t);
+
         } while (true);
         return tagsToBeReturned;
     }
@@ -128,10 +117,12 @@ public class WriterView {
 
     private static void writerCreate() {
         Writer w = new Writer();
+
         System.out.println("Input new writer name \n 'q' for quit");
         do {
             String s = sc.nextLine();
             if (s.equalsIgnoreCase("q")) System.exit(0);
+
             if (!writerService.nameContains(s)) {
                 w.setName(s);
                 writerService.add(w);
@@ -150,6 +141,7 @@ public class WriterView {
         do {
             String s = sc.nextLine();
             if (s.equalsIgnoreCase("q")) System.exit(0);
+
             if (!writerService.nameContains(s)) {
                 try {
                     Long id = Long.valueOf(s);
@@ -207,12 +199,7 @@ public class WriterView {
 
     private static void getWriterPosts() {
         Writer w = getWriter();
-        List<Post> writerPosts = w.getPosts();
-        if (!writerPosts.isEmpty()){
-            writerPosts.forEach(EntityPrinter::print);
-        } else {
-            System.out.println("Writer has no posts");
-        }
+        w.getPosts().forEach(EntityPrinter::print);
     }
 
     private static void getAllWriters() {

@@ -9,14 +9,16 @@ import java.util.List;
 public class EntityPrinter {
 
     public static void print(Object object) {
-        if (object instanceof Writer) {
-            print((Writer) object);
-        } else if (object instanceof Post) {
-            print((Post) object);
-        } else if (object instanceof Tag) {
-            print((Tag) object);
-        } else {
-            System.out.println("It is unknown instance");
+        if (object != null) {
+            if (object instanceof Writer) {
+                print((Writer) object);
+            } else if (object instanceof Post) {
+                print((Post) object);
+            } else if (object instanceof Tag) {
+                print((Tag) object);
+            } else {
+                System.out.println("It is unknown instance");
+            }
         }
     }
 
@@ -28,7 +30,7 @@ public class EntityPrinter {
 
         List<Post> posts = writer.getPosts();
 
-        if (posts.isEmpty()) {
+        if (posts == null || posts.isEmpty()) {
             System.out.println("Zero posts");
         } else {
             System.out.printf("%d posts: \n", posts.size());
@@ -44,7 +46,7 @@ public class EntityPrinter {
 
         List<Tag> tags = post.getTags();
 
-        if (tags.isEmpty()) {
+        if (tags == null || tags.isEmpty()) {
             System.out.println("Zero tags");
         } else {
             tags.forEach(EntityPrinter::print);

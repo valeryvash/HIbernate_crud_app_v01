@@ -1,9 +1,7 @@
 package model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -12,27 +10,37 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(nullable = false,name = "content")
+    @Column(
+            nullable = false,
+            name = "content"
+    )
     private String content;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+
+    @ManyToMany(
+            fetch = FetchType.EAGER,
+            cascade = {CascadeType.PERSIST,CascadeType.MERGE}
+    )
+    @JoinTable(
+            name = "posts_tags",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
     private List<Tag> tags;
-
-    @Column(nullable = false,name = "post_status")
-    @Enumerated(EnumType.STRING)
-    private PostStatus postStatus = PostStatus.ACTIVE;
-
-    @ManyToOne
-    @JoinColumn(name = "writer_id",nullable = false)
+    @ManyToOne(
+            fetch = FetchType.LAZY
+    )
+    @JoinColumn(
+            name = "writer_id"
+    )
     private Writer writer;
 
-    public Writer getWriter() {
-        return writer;
-    }
-
-    public void setWriter(Writer writer) {
-        this.writer = writer;
-    }
+    @Column(
+            nullable = false,
+            name = "post_status"
+    )
+    @Enumerated(EnumType.STRING)
+    private PostStatus postStatus = PostStatus.ACTIVE;
 
     public PostStatus getPostStatus() {
         return postStatus;
@@ -62,16 +70,19 @@ public class Post {
     }
 
     public List<Tag> getTags() {
-        if (this.tags != null) {
-            return List.copyOf(this.tags);
-        } else {
-            return new ArrayList<>();
-        }
+        return tags;
     }
 
-    public void setTags(List<Tag> tags) {
-        if (tags != null) {
-            this.tags = List.copyOf(tags);
-        }
+    public void setTags(List<Tag> tag) {
+        this.tags = tag;
     }
+
+    public Writer getWriter() {
+        return writer;
+    }
+
+    public void setWriter(Writer writer) {
+        this.writer = writer;
+    }
+
 }

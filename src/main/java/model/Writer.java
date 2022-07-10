@@ -2,7 +2,6 @@ package model;
 
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -10,18 +9,23 @@ import java.util.List;
 public class Writer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(
+            strategy = GenerationType.IDENTITY
+    )
     private long id;
 
-    @Column(nullable = false,
-            name = "name")
+    @Column(
+            nullable = false,
+            name = "name"
+    )
     private String name;
 
     @OneToMany(
             fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-            orphanRemoval = true,
-            mappedBy = "writer"
+            cascade = {CascadeType.PERSIST,CascadeType.MERGE}
+    )
+    @JoinColumn(
+            name = "writer_id"
     )
     private List<Post> posts;
 
@@ -45,16 +49,12 @@ public class Writer {
     }
 
     public List<Post> getPosts() {
-        if (this.posts != null) {
-            return List.copyOf(this.posts);
-        } else {
-            return new ArrayList<>();
-        }
+        return posts;
     }
 
     public void setPosts(List<Post> posts) {
-        if (posts != null) {
-            this.posts = List.copyOf(posts);
-        }
+        this.posts = posts;
     }
+
+
 }

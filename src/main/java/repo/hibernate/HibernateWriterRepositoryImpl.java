@@ -1,11 +1,16 @@
 package repo.hibernate;
 
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import model.Post;
+import model.Tag;
 import model.Writer;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import repo.WriterRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static util.SessionProvider.provideSession;
@@ -14,12 +19,19 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
 
     @Override
     public void add(Writer entity) {
+        Transaction transaction = null;
+
         try (Session session = provideSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
             session.persist(entity);
 
-            session.getTransaction().commit();
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
     }
 
@@ -29,64 +41,76 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
      */
     @Override
     public Writer get(Long aLong) {
+        Writer writer = null;
+
         try (Session session = provideSession()) {
-            session.beginTransaction();
 
-            Writer writer = session.createQuery(
-                            "select w " +
-                                    "from Writer  w " +
-                                    "left join fetch Post p " +
-                                    "left join Tag t " +
-                                    "where w.id =?1 ",
-                            Writer.class
-                    )
-                    .setParameter(1, aLong)
-                    .getSingleResult();
+            writer = session.createQuery("""
+                                            FROM Writer as writer
+                                            LEFT JOIN FETCH writer.posts
+                                            WHERE writer.id = ?1 """,
+                                    Writer.class)
+                            .setParameter(1, aLong)
+                            .getSingleResult();
 
-            session.getTransaction().commit();
-
-            return writer;
         }
+
+        if (writer == null) {
+            writer = new Writer();
+        }
+
+        return writer;
     }
 
     @Override
     public void update(Writer entity) {
+        Transaction transaction = null;
+
         try (Session session = provideSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
             session.merge(entity);
 
-            session.getTransaction().commit();
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
     }
 
     @Override
     public void remove(Long aLong) {
+        Transaction transaction = null;
+
         try (Session session = provideSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
             Writer writer = session.get(Writer.class, aLong);
 
             session.remove(writer);
 
-            session.getTransaction().commit();
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
     }
 
     @Override
     public List<Writer> getAll() {
+        List<Writer> writerList = null;
         try (Session session = provideSession()) {
-            session.beginTransaction();
 
-            List<Writer> writerList = session.createQuery(
-                            "select w from Writer w " +
-                                    "left join fetch Post p " +
-                                    "left join fetch Tag t",
-                            Writer.class
-                    )
+            writerList = session.createQuery(
+                            """
+                                    FROM Writer as writer 
+                                    LEFT JOIN FETCH writer.posts""",
+                            Writer.class)
                     .getResultList();
-
-            session.getTransaction().commit();
 
             return writerList;
         }
@@ -95,11 +119,8 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
     @Override
     public boolean containsId(Long id) {
         try (Session session = provideSession()) {
-            session.beginTransaction();
 
             Writer w = session.get(Writer.class, id);
-
-            session.getTransaction().commit();
 
             return w != null;
         }
@@ -108,17 +129,15 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
     @Override
     public boolean nameContains(String name) {
         try (Session session = provideSession()) {
-            session.beginTransaction();
 
-            Writer w = session
-                    .createQuery("select w " +
-                                    "from Writer w " +
-                                    "where w.name = ?1 ",
+            Writer w = session.createQuery(
+                            """
+                                    FROM Writer w 
+                                    LEFT JOIN FETCH w.posts
+                                    WHERE w.name = ?1 """,
                             Writer.class)
                     .setParameter(1, name)
                     .getSingleResult();
-
-            session.getTransaction().commit();
 
             return true;
         } catch (NoResultException e) {
@@ -128,20 +147,29 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
 
     @Override
     public Writer getByName(String name) {
+        Transaction transaction = null;
         try (Session session = provideSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
-            Writer w = session.createQuery(
-                            "select w " +
-                                    "from Writer w " +
-                                    "left join fetch w.posts " +
-                                    "where w.name = ?1",
+            List<Writer> list = session.createQuery(
+                            """
+                                    FROM Writer w 
+                                    LEFT JOIN FETCH w.posts
+                                    WHERE w.name = ?1 """,
                             Writer.class
                     )
                     .setParameter(1, name)
-                    .getSingleResult();
+                    .getResultList();
 
-            session.getTransaction().commit();
+            Writer w = null;
+
+            if (!list.isEmpty()) {
+                w = list.get(0);
+            } else {
+                w = new Writer();
+            }
+
+            transaction.commit();
 
             return w;
         }

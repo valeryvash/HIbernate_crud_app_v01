@@ -1,10 +1,16 @@
 package repo.hibernate;
 
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import model.Post;
 import model.PostStatus;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.postgresql.core.NativeQuery;
 import repo.PostRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static util.SessionProvider.provideSession;
@@ -12,90 +18,106 @@ import static util.SessionProvider.provideSession;
 public class HibernatePostRepositoryImpl implements PostRepository {
     @Override
     public void add(Post entity) {
+        Transaction transaction = null;
         try (Session session = provideSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
             session.persist(entity);
 
-            session.getTransaction().commit();
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
     }
 
-    /*
-     *   The better way according to:
-     *   https://www.baeldung.com/hibernate-initialize-proxy-exception
-     */
     @Override
     public Post get(Long aLong) {
+        Post post = null;
+
         try (Session session = provideSession()) {
-            session.beginTransaction();
 
-            Post post =
-            session.createQuery(
-                            "select p " +
-                                    "from Post p " +
-                                    "left join fetch p.tags " +
-                                    "where p.id = ?1 ",
-                            Post.class)
-                    .setParameter(1, aLong)
-                    .getSingleResult();
+            post = session.get(Post.class, aLong);
 
-            session.getTransaction().commit();
-
-            return post;
+        } catch (HibernateException e) {
+            e.printStackTrace();
         }
+
+        if (post == null) {
+            post = new Post();
+        }
+
+        return post;
     }
 
     @Override
     public void update(Post entity) {
+        Transaction transaction = null;
+
         try (Session session = provideSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
             session.merge(entity);
 
-            session.getTransaction().commit();
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
     }
 
     @Override
     public void remove(Long aLong) {
+        Transaction transaction = null;
+
         try (Session session = provideSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
             Post post = session.get(Post.class, aLong);
 
             session.remove(post);
 
-            session.getTransaction().commit();
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
     }
 
     @Override
     public List<Post> getAll() {
-        try (Session session = provideSession()) {
-            session.beginTransaction();
+        List<Post> posts = null;
 
-            List<Post> posts = session.createQuery(
-                    "select a " +
-                                    "from Post a " +
-                                    "left join fetch a.tags",
+        try (Session session = provideSession()) {
+
+            posts = session.createQuery("""
+                                    FROM Post p
+                                    LEFT JOIN FETCH p.tags """,
                             Post.class)
                     .getResultList();
 
-            session.getTransaction().commit();
-
-            return posts;
+        } catch (HibernateException e) {
+            e.printStackTrace();
         }
+
+        if (posts == null) {
+            posts = new ArrayList<>();
+        }
+
+        return posts;
     }
 
     @Override
     public boolean containsId(Long id) {
         try (Session session = provideSession()) {
-            session.beginTransaction();
 
             Post post = session.get(Post.class, id);
-
-            session.getTransaction().commit();
 
             return post != null;
         }
@@ -103,27 +125,30 @@ public class HibernatePostRepositoryImpl implements PostRepository {
 
     @Override
     public void deleteByStatus(PostStatus postStatus) {
-        if (postStatus != null) {
-            try (Session session = provideSession()) {
-                session.beginTransaction();
+        Transaction transaction = null;
 
+        try (Session session = provideSession()) {
+            transaction = session.beginTransaction();
 
-                List<Post> resultList = session
-                        .createQuery("select p " +
-                                        "from Post p " +
-                                        "where p.postStatus = ?1 ",
-                                Post.class)
-                        .setParameter(1, postStatus)
-                        .getResultList();
+            List<Post> resultList = session.createQuery("""
+                                    FROM Post p 
+                                    WHERE p.postStatus = ?1 """,
+                            Post.class)
+                    .setParameter(1, postStatus)
+                    .getResultList();
 
-
-                if (!resultList.isEmpty()) {
-                    resultList.forEach(session::remove);
-                }
-
-                session.getTransaction().commit();
+            if (!resultList.isEmpty()) {
+                resultList.forEach(session::remove);
             }
+
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
+
     }
 
 }

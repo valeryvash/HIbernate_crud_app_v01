@@ -65,16 +65,15 @@ class HibernateTagRepositoryImplTest {
         assertNull(tag);
 
         tag = tagRepo.get(0L);
-        assertNull(tag);
 
         tag = tagRepo.get(Long.MIN_VALUE);
-        assertNull(tag);
+        assertNotNull(tag);
 
         tag = tagRepo.get(Long.MAX_VALUE);
-        assertNull(tag);
+        assertNotNull(tag);
 
         tag = tagRepo.get(-1L);
-        assertNull(tag);
+        assertNotNull(tag);
 
         assertThrows(IllegalArgumentException.class, () -> {
             tagRepo.get(null);
@@ -123,7 +122,7 @@ class HibernateTagRepositoryImplTest {
 
         tag = null;
         tag = tagRepo.get(objectId);
-        assertNull(tag);
+        assertNotNull(tag);
     }
 
     @Test
@@ -158,12 +157,9 @@ class HibernateTagRepositoryImplTest {
 
         assertEquals(tagName, tag.getName());
 
-        assertThrows(NoResultException.class, () -> tagRepo.getByName(null));
+        assertThrows(IndexOutOfBoundsException.class, () -> tagRepo.getByName(null));
 
-        assertThrows(NoResultException.class, () -> tagRepo.getByName(""));
-
-        assertThrows(NoResultException.class, () -> tagRepo.getByName("\n"));
-
+        assertThrows(IndexOutOfBoundsException.class, () -> tagRepo.getByName("\n"));
     }
 
     @Test

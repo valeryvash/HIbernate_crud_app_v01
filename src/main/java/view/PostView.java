@@ -39,7 +39,7 @@ public class PostView {
     private static final PostRepository pr = new HibernatePostRepositoryImpl();
     private static final TagRepository tr = new HibernateTagRepositoryImpl();
 
-    private final static PostService postService = new PostService(tr,pr);
+    private final static PostService postService = new PostService(pr);
     private final static TagService tagService = new TagService(tr);
 
     public static void run() {
@@ -49,13 +49,13 @@ public class PostView {
 
     private static void choice() {
         switch (sc.nextLine().toLowerCase()) {
-            case "1" -> showAllPosts();//done
-            case "2" -> getPostById(); //done
-            case "3" -> updatePostContentById();//done
-            case "4" -> updatePostTagsById();//done
-            case "5" -> updatePostStatusById();//done
-            case "6" -> deletePostById();//done
-            case "7" -> deletePostsByStatus();//done
+            case "1" -> showAllPosts(); // done
+            case "2" -> getPostById();  // done
+            case "3" -> updatePostContentById(); // done
+            case "4" -> updatePostTagsById(); // done
+            case "5" -> updatePostStatusById(); // done
+            case "6" -> deletePostById(); // done
+            case "7" -> deletePostsByStatus(); // done
             case "8" -> getPostsByStatus();
 
             case "q" -> System.exit(0);
@@ -76,6 +76,7 @@ public class PostView {
 
     private static List<Tag> getTagsList() {
         List<Tag> tagsToBeReturned = new ArrayList<>();
+
         System.out.println("Input tag name. 's' for skip, 'q' for quit");
         do {
             String s = sc.nextLine();
@@ -100,10 +101,10 @@ public class PostView {
     }
 
     private static void getPostsByStatus() {
-        PostStatus ps = getPostStatus();
+        PostStatus postStatus = getPostStatus();
         postService.getAll()
                 .stream()
-                .filter(p -> p.getPostStatus() == ps)
+                .filter(p -> p.getPostStatus() == postStatus)
                 .forEach(EntityPrinter::print);
     }
 
@@ -113,19 +114,23 @@ public class PostView {
                 1. ACTIVE
                 2. DELETED
                  'q' for quit""");
+
+        PostStatus postStatus = null;
         do {
             String s = sc.nextLine().toLowerCase();
             if (s.equals("q")) System.exit(0);
+
             switch (s) {
                 case "1" -> {
-                    return PostStatus.ACTIVE;
+                    postStatus = PostStatus.ACTIVE;
                 }
                 case "2" -> {
-                    return PostStatus.DELETED;
+                    postStatus = PostStatus.DELETED;
                 }
                 default -> System.out.println("Wrong point. Input other");
             }
-        } while (true);
+        } while (postStatus != null);
+        return postStatus;
     }
 
     private static  Post getPostById() {
