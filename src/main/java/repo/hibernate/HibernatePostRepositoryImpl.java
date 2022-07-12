@@ -1,13 +1,10 @@
 package repo.hibernate;
 
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 import model.Post;
 import model.PostStatus;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.postgresql.core.NativeQuery;
 import repo.PostRepository;
 
 import java.util.ArrayList;
@@ -39,7 +36,13 @@ public class HibernatePostRepositoryImpl implements PostRepository {
 
         try (Session session = provideSession()) {
 
-            post = session.get(Post.class, aLong);
+            post = session.createQuery("""
+                            FROM Post post
+                            LEFT JOIN FETCH post.tags
+                            WHERE post.id = ?1 """,
+                    Post.class)
+                    .setParameter(1, aLong)
+                    .getSingleResult();
 
         } catch (HibernateException e) {
             e.printStackTrace();

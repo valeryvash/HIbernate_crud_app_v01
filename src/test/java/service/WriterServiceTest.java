@@ -12,7 +12,7 @@ import static org.mockito.Mockito.*;
 class WriterServiceTest {
 
     private static WriterRepository wR = mock(WriterRepository.class);
-    static WriterService writerService = new WriterService(wR);
+    private WriterService writerService = new WriterService(wR);
 
     @BeforeAll
     static void set() {

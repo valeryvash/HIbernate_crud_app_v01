@@ -1,16 +1,13 @@
 package repo.hibernate;
 
 import jakarta.persistence.NoResultException;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import model.Post;
-import model.Tag;
 import model.Writer;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import repo.WriterRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static util.SessionProvider.provideSession;
@@ -46,12 +43,20 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
         try (Session session = provideSession()) {
 
             writer = session.createQuery("""
-                                            FROM Writer as writer
+                                            FROM Writer as writer 
                                             LEFT JOIN FETCH writer.posts
-                                            WHERE writer.id = ?1 """,
-                                    Writer.class)
-                            .setParameter(1, aLong)
-                            .getSingleResult();
+                                            WHERE writer.id = :id """,
+                            Writer.class)
+                    .setParameter("id", aLong)
+                    .getSingleResult();
+
+            session.createQuery("""
+                            FROM Post post
+                            LEFT JOIN FETCH post.tags
+                            WHERE post.writer in (:writer)  """,
+                            Post.class)
+                    .setParameter("writer",writer)
+                    .getResultList();
 
         }
 
@@ -110,6 +115,15 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
                                     FROM Writer as writer 
                                     LEFT JOIN FETCH writer.posts""",
                             Writer.class)
+                    .getResultList();
+
+            session.createQuery(
+                            """
+                                    FROM Post as post 
+                                    LEFT JOIN FETCH post.tags
+                                    WHERE post.writer in :list """,
+                            Post.class)
+                    .setParameterList("list",writerList)
                     .getResultList();
 
             return writerList;

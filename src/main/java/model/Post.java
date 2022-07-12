@@ -6,6 +6,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "posts")
+
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +19,7 @@ public class Post {
 
 
     @ManyToMany(
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST,CascadeType.MERGE}
     )
     @JoinTable(
