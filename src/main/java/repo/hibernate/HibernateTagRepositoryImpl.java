@@ -17,7 +17,7 @@ public class HibernateTagRepositoryImpl implements TagRepository {
 
 
     @Override
-    public void add(Tag entity) {
+    public Tag add(Tag entity) {
         Transaction transaction = null;
         try (Session session = provideSession()) {
             transaction = session.beginTransaction();
@@ -31,6 +31,7 @@ public class HibernateTagRepositoryImpl implements TagRepository {
             }
             e.printStackTrace();
         }
+        return entity;
     }
 
     @Override
@@ -51,13 +52,14 @@ public class HibernateTagRepositoryImpl implements TagRepository {
     }
 
     @Override
-    public void update(Tag entity) {
+    public Tag update(Tag entity) {
+        Tag tag = null;
         Transaction transaction = null;
 
         try (Session session = provideSession()) {
             transaction = session.beginTransaction();
 
-            session.merge(entity);
+            tag = session.merge(entity);
 
             transaction.commit();
         } catch (HibernateException e) {
@@ -66,15 +68,17 @@ public class HibernateTagRepositoryImpl implements TagRepository {
             }
             e.printStackTrace();
         }
+        return tag;
     }
 
     @Override
-    public void remove(Long aLong) {
+    public Tag remove(Long aLong) {
+        Tag tag = null;
         Transaction transaction = null;
         try (Session session = provideSession()) {
             transaction = session.beginTransaction();
 
-            Tag tag = session.get(Tag.class,aLong);
+            tag = session.get(Tag.class,aLong);
 
             session.remove(tag);
 
@@ -85,6 +89,7 @@ public class HibernateTagRepositoryImpl implements TagRepository {
             }
             e.printStackTrace();
         }
+        return tag;
     }
 
     @Override

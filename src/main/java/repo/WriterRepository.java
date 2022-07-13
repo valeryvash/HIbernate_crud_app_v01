@@ -6,16 +6,16 @@ import java.util.List;
 
 public interface WriterRepository extends GenericRepository<Long, Writer> {
     @Override
-    void add(Writer entity);
+    Writer add(Writer entity);
 
     @Override
     Writer get(Long aLong);
 
     @Override
-    void update(Writer entity);
+    Writer update(Writer entity);
 
     @Override
-    void remove(Long aLong);
+    Writer remove(Long aLong);
 
     @Override
     List<Writer> getAll();

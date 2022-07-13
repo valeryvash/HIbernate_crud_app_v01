@@ -14,7 +14,7 @@ import static util.SessionProvider.provideSession;
 
 public class HibernatePostRepositoryImpl implements PostRepository {
     @Override
-    public void add(Post entity) {
+    public Post add(Post entity) {
         Transaction transaction = null;
         try (Session session = provideSession()) {
             transaction = session.beginTransaction();
@@ -28,6 +28,7 @@ public class HibernatePostRepositoryImpl implements PostRepository {
             }
             e.printStackTrace();
         }
+        return entity;
     }
 
     @Override
@@ -56,13 +57,14 @@ public class HibernatePostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public void update(Post entity) {
+    public Post update(Post entity) {
+        Post post = null;
         Transaction transaction = null;
 
         try (Session session = provideSession()) {
             transaction = session.beginTransaction();
 
-            session.merge(entity);
+            post = session.merge(entity);
 
             transaction.commit();
         } catch (HibernateException e) {
@@ -71,16 +73,18 @@ public class HibernatePostRepositoryImpl implements PostRepository {
             }
             e.printStackTrace();
         }
+        return post;
     }
 
     @Override
-    public void remove(Long aLong) {
+    public Post remove(Long aLong) {
+        Post post = null;
         Transaction transaction = null;
 
         try (Session session = provideSession()) {
             transaction = session.beginTransaction();
 
-            Post post = session.get(Post.class, aLong);
+            post = session.get(Post.class, aLong);
 
             session.remove(post);
 
@@ -91,6 +95,7 @@ public class HibernatePostRepositoryImpl implements PostRepository {
             }
             e.printStackTrace();
         }
+        return post;
     }
 
     @Override

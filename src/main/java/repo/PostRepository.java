@@ -2,21 +2,22 @@ package repo;
 
 import model.Post;
 import model.PostStatus;
+import model.Writer;
 
 import java.util.List;
 
 public interface PostRepository extends GenericRepository<Long, Post> {
     @Override
-    void add(Post entity);
+    Post add(Post entity);
 
     @Override
     Post get(Long aLong);
 
     @Override
-    void update(Post entity);
+    Post update(Post entity);
 
     @Override
-    void remove(Long aLong);
+    Post remove(Long aLong);
 
     @Override
     List<Post> getAll();

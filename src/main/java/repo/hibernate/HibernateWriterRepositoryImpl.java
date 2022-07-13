@@ -15,7 +15,7 @@ import static util.SessionProvider.provideSession;
 public class HibernateWriterRepositoryImpl implements WriterRepository {
 
     @Override
-    public void add(Writer entity) {
+    public Writer add(Writer entity) {
         Transaction transaction = null;
 
         try (Session session = provideSession()) {
@@ -30,6 +30,7 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
             }
             e.printStackTrace();
         }
+        return entity;
     }
 
     /*
@@ -44,13 +45,13 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
 
             writer = session.createQuery("""
                                             FROM Writer as writer 
-                                            LEFT JOIN FETCH writer.posts
+                                            LEFT OUTER JOIN FETCH writer.posts posts
                                             WHERE writer.id = :id """,
                             Writer.class)
                     .setParameter("id", aLong)
                     .getSingleResult();
 
-            session.createQuery("""
+            List<Post> writerPosts = session.createQuery("""
                             FROM Post post
                             LEFT JOIN FETCH post.tags
                             WHERE post.writer in (:writer)  """,
@@ -68,13 +69,14 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
     }
 
     @Override
-    public void update(Writer entity) {
+    public Writer update(Writer entity) {
+        Writer writer = null;
         Transaction transaction = null;
 
         try (Session session = provideSession()) {
             transaction = session.beginTransaction();
 
-            session.merge(entity);
+            writer = session.merge(entity);
 
             transaction.commit();
         } catch (HibernateException e) {
@@ -83,16 +85,18 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
             }
             e.printStackTrace();
         }
+        return writer;
     }
 
     @Override
-    public void remove(Long aLong) {
+    public Writer remove(Long aLong) {
+        Writer writer = null;
         Transaction transaction = null;
 
         try (Session session = provideSession()) {
             transaction = session.beginTransaction();
 
-            Writer writer = session.get(Writer.class, aLong);
+            writer = session.get(Writer.class, aLong);
 
             session.remove(writer);
 
@@ -103,6 +107,7 @@ public class HibernateWriterRepositoryImpl implements WriterRepository {
             }
             e.printStackTrace();
         }
+        return writer;
     }
 
     @Override
